@@ -1,63 +1,16 @@
 import os
 from dotenv import load_dotenv
 from openai import OpenAI
-import numpy as np
+
 from audio_utils import (
-    record_until_enter,
-    temp_wav_path,
-    save_wav,
-    play_wav_bytes,
-    SAMPLE_RATE,
+    record_until_enter, temp_wav_path, save_wav,
+    play_wav_bytes, SAMPLE_RATE
 )
 
-# =========================
-# MODELOS / CONFIG
-# =========================
-TEXT_MODEL = os.getenv("OPENAI_TEXT_MODEL", "gpt-4o-mini")
-STT_MODEL  = os.getenv("OPENAI_STT_MODEL",  "gpt-4o-mini-transcribe")
-TTS_MODEL  = os.getenv("OPENAI_TTS_MODEL",  "gpt-4o-mini-tts")
-TTS_VOICE  = os.getenv("OPENAI_TTS_VOICE",  "alloy")
+from stt import transcribe_wav
+from llm import chat_response
+from tts import tts_wav_bytes
 
-
-# =========================
-# OpenAI: STT, LLM, TTS
-# =========================
-def transcribe_wav(client: OpenAI, wav_path: str) -> str:
-    with open(wav_path, "rb") as f:
-        text = client.audio.transcriptions.create(
-            model=STT_MODEL,
-            file=f,
-            response_format="text",
-        )
-    return text if isinstance(text, str) else getattr(text, "text", str(text))
-
-
-def chat_response(client: OpenAI, user_text: str, history: list) -> str:
-    messages = [
-        {"role": "system", "content": "Você é um assistente de voz objetivo e educado. Responda em PT-BR."},
-        *history[-6:],  
-        {"role": "user", "content": user_text},
-    ]
-    chat = client.chat.completions.create(
-        model=TEXT_MODEL,
-        messages=messages,
-        temperature=0.5,
-    )
-    return chat.choices[0].message.content.strip()
-
-
-def tts_wav_bytes(client: OpenAI, text: str) -> bytes:
-    speech = client.audio.speech.create(
-        model=TTS_MODEL,
-        voice=TTS_VOICE,
-        input=text,
-    )
-    return speech.read() if hasattr(speech, "read") else bytes(speech)
-
-
-# =========================
-# MAIN LOOP
-# =========================
 def main():
     load_dotenv()
     if not os.getenv("OPENAI_API_KEY"):
@@ -66,7 +19,7 @@ def main():
     client = OpenAI()
     history = []
 
-    print("=== Voice Bot (refatoração etapa 1: módulo de áudio) ===")
+    print("=== Voice Bot (refatorado: áudio + stt + llm + tts) ===")
     print("Diga 'sair' para encerrar.\n")
 
     while True:
