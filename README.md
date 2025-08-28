@@ -86,7 +86,7 @@ OPENAI_API_KEY=coloque_sua_chave_aqui
 voice_bot/
   .env
   main.py               # orquestra o fluxo fala→texto→resposta→fala
-  audio_utils.py        # gravação, salvar WAV, tocar WAV, VAD por energia
+  audio_utils.py        # gravação, salvar WAV, tocar WAV
   stt.py                # transcrição (OpenAI)
   llm.py                # resposta (OpenAI)
   tts.py                # síntese de voz (OpenAI)
@@ -111,7 +111,7 @@ python main.py
 > O modo de captura pode estar configurado para:
 >
 > * **ENTER→fala→ENTER** (função `record_until_enter`), ou
-> * **VAD (silêncio)** com `record_until_silence` (detecção automática de fim da fala).
+
 
 ---
 
